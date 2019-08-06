@@ -1,7 +1,7 @@
 all:
 
 requirements:
-	pip install -r $^
+	pip install -r requirements.txt
 
 test:
 ifdef MOLECULE_DEBUG
