@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/UbiCastTeam/ansible-role-rocketchat.svg?branch=master)](https://travis-ci.com/UbiCastTeam/ansible-role-rocketchat)
+
 Rocket.Chat
 ===========
 
