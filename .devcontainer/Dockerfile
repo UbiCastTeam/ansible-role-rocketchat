@@ -41,11 +41,11 @@ RUN \
     rm -f packer_${PACKER_VERSION}* && \
     :
 
-COPY requirements.dev.txt .
+COPY requirements.txt .
 RUN \
     # ansible & co
-    pip install -r requirements.dev.txt && \
-    rm requirements.dev.txt && \
+    pip install -r requirements.txt && \
+    rm requirements.txt && \
     :
 
 # switch back to dialog for any ad-hoc use of apt-get

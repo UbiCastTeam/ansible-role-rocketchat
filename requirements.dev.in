@@ -1,6 +1,0 @@
--r requirements.in
-ansible-lint
-molecule[docker,ec2]
-pip-tools
-pre-commit
-yamllint
