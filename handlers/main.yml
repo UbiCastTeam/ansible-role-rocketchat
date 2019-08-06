@@ -1,0 +1,20 @@
+---
+
+- name: reload systemd
+  systemd:
+    daemon_reload: true
+
+- name: restart mongodb
+  systemd:
+    name: mongod
+    state: restarted
+
+- name: initialize mongodb
+  command: /usr/bin/mongo --eval "printjson(rs.initiate())"
+
+- name: restart rocketchat
+  systemd:
+    name: rocketchat
+    state: restarted
+
+...

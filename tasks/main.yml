@@ -1,0 +1,160 @@
+---
+
+- name: add role requirement
+  apt:
+    name: "{{ rc_apt_packages_requirements }}"
+    update_cache: true
+    cache_valid_time: 3600
+    state: present
+
+- name: add group
+  group:
+    name: "{{ rc_group }}"
+    system: true
+    state: present
+
+- name: add user
+  user:
+    name: "{{ rc_user }}"
+    group: "{{ rc_group }}"
+    home: /var/run/{{ rc_user }}
+    shell: /usr/bin/nologin
+    system: true
+    state: present
+
+- name: add mongodb repository key
+  apt_key:
+    url: "{{ rc_mongo_repo_key_url }}"
+    state: present
+
+- name: add mongodb repository
+  apt_repository:
+    repo: "{{ rc_mongo_repo }}"
+    filename: "{{ rc_mongo_repo_file }}"
+    state: present
+
+- name: add nodesource repository key
+  apt_key:
+    url: "{{ rc_node_repo_key_url }}"
+    state: present
+
+- name: add nodesource repository
+  apt_repository:
+    repo: "{{ rc_node_repo }}"
+    filename: "{{ rc_node_repo_file }}"
+    state: present
+
+- name: install system requirements
+  apt:
+    name: "{{ rc_apt_packages }}"
+    update_cache: true
+    cache_valid_time: 3600
+    state: present
+
+- name: set mongodb engine
+  notify: restart mongodb
+  lineinfile:
+    path: /etc/mongod.conf
+    regexp: '^#?  engine:'
+    line: '  engine: mmapv1'
+
+- name: set mongodb replset name
+  notify:
+    - restart mongodb
+    - initialize mongodb
+  blockinfile:
+    path: /etc/mongod.conf
+    block: |
+      replication:
+        replSetName: rs01
+
+- name: install global npm requirements
+  changed_when: false  # npm module is not idempotent
+  loop: "{{ rc_npm_packages }}"
+  npm:
+    name: "{{ item }}"
+    global: true
+    state: present
+
+- name: fix nodejs version
+  command: n {{ rc_node_version }}
+  args:
+    creates: /usr/local/n/versions/node/{{ rc_node_version }}
+
+- name: download archive
+  register: rc_dl_archive
+  get_url:
+    url: "{{ rc_url }}"
+    dest: /var/cache/rocketchat_{{ rc_version }}.tgz
+
+- name: create temp extract directory
+  when: rc_dl_archive is changed
+  file:
+    path: /var/cache/rc_{{ rc_version }}
+    state: directory
+
+- name: extract archive content
+  when: rc_dl_archive is changed
+  unarchive:
+    src: /var/cache/rocketchat_{{ rc_version }}.tgz
+    dest: /var/cache/rc_{{ rc_version }}
+    remote_src: true
+
+- name: install npm requirements
+  when: rc_dl_archive is changed
+  npm:
+    path: /var/cache/rc_{{ rc_version }}/bundle/programs/server
+    state: present
+
+- name: check if service exists
+  register: rc_service
+  stat:
+    path: /lib/systemd/system/rocketchat.service
+
+- name: stop rocketchat
+  when:
+    - rc_service.stat.exists
+    - rc_dl_archive is changed
+  systemd:
+    name: rocketchat
+    state: stopped
+
+- name: remove current application files
+  when: rc_dl_archive is changed
+  file:
+    path: "{{ rc_directory }}"
+    state: absent
+
+- name: copy application files
+  when: rc_dl_archive is changed
+  notify: restart rocketchat
+  copy:
+    remote_src: true
+    src: /var/cache/rc_{{ rc_version }}/bundle/
+    dest: "{{ rc_directory }}"
+    owner: "{{ rc_user }}"
+    group: "{{ rc_group }}"
+
+- name: remove cache files
+  when: rc_dl_archive is changed
+  file:
+    path: /var/cache/rc_{{ rc_version }}
+    state: absent
+
+- name: deploy service file
+  notify:
+    - reload systemd
+    - restart rocketchat
+  template:
+    src: rocketchat.service.j2
+    dest: /lib/systemd/system/rocketchat.service
+
+- meta: flush_handlers
+
+- name: enable rocketchat service
+  systemd:
+    name: rocketchat
+    enabled: true
+    state: started
+
+...

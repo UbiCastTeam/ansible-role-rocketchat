@@ -1,0 +1,22 @@
+---
+
+galaxy_info:
+  author: Nicolas Karolak
+  description: Install and update Rocket.Chat (manual installation)
+  company: UbiCast
+
+  license: BSD
+
+  min_ansible_version: 2.4
+
+  platforms:
+    - name: Debian
+      versions:
+        - 9
+
+  galaxy_tags:
+    - system
+
+dependencies: []
+
+...

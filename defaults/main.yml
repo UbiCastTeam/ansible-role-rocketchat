@@ -1,0 +1,60 @@
+---
+
+# package needed by ansible to run the role
+rc_apt_packages_requirements:
+  - apt-transport-https
+  - apt-utils
+  - curl
+  - gnupg2
+
+# mongodb repo
+rc_mongo_repo_key_url: https://www.mongodb.org/static/pgp/server-4.0.asc
+rc_mongo_repo: deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.0 main
+rc_mongo_repo_file: mongodb-org-4.0
+
+# nodejs repo
+rc_node_repo_key_url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+rc_node_repo: deb https://deb.nodesource.com/node_8.x stretch main
+rc_node_repo_file: nodesource
+
+# apt package requirements
+rc_apt_packages:
+  - build-essential
+  - git
+  - graphicsmagick
+  - mongodb-org
+  - nodejs
+
+# global npm package requirements
+rc_npm_packages:
+  - inherits
+  - n
+
+# nodejs version
+rc_node_version: 8.11.4
+
+# version & archive url
+rc_version: 1.3.0
+rc_url: https://releases.rocket.chat/{{ rc_version }}/download
+
+# where to install
+rc_directory: /usr/local/rocketchat
+
+# user & group
+rc_user: rocketchat
+rc_group: rocketchat
+
+# mongodb settings
+rc_mongo_url: mongodb://localhost:27017/rocketchat?replicaSet=rs01
+rc_mongo_oplog_url: mongodb://localhost:27017/local?replicaSet=rs01
+
+# url by which it is accessible
+rc_root_url: http://localhost:3000
+
+# listen on port
+rc_port: 3000
+
+# email server:port to send notifications
+rc_mail_url: localhost:25
+
+...
