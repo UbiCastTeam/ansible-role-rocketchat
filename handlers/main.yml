@@ -10,7 +10,7 @@
     state: restarted
 
 - name: initialize mongodb
-  command: /usr/bin/mongo --eval "printjson(rs.initiate())"
+  command: mongo --eval "printjson(rs.initiate())"
 
 - name: restart rocketchat
   systemd:

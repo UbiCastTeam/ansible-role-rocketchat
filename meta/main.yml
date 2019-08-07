@@ -13,6 +13,9 @@ galaxy_info:
     - name: Debian
       versions:
         - 9
+    - name: Ubuntu
+      versions:
+        - bionic
 
   galaxy_tags:
     - system
